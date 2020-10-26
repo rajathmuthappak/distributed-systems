@@ -34,7 +34,7 @@ public class Server {
 	public static List<String> listOfClients = new ArrayList<String>();
 	public static Map<String, String> clientIdentifiers = new HashMap<String, String>();
 
-	public static Map<String, ArrayList<String>> clientDirectories = new HashMap<String, ArrayList<String>>();
+	public static Map<String, List<String>> clientDirectories = new HashMap<String, List<String>>();
 
 	public static Map<String, ArrayList<String>> clientLocalDirectory;
 
@@ -197,7 +197,7 @@ public class Server {
 	 * @param clientName
 	 */
 	private static void assignClientIdentifier(String clientName) {
-		String clientIdentifier = listOfClients.size() % 3 == 0 ? "A" : listOfClients.size() % 3 == 1 ? "B" : "C";
+		String clientIdentifier = listOfClients.size() % 3 == 1 ? "A" : listOfClients.size() % 3 == 2 ? "B" : "C";
 		if (!clientIdentifiers.containsKey(clientName)) {
 			clientIdentifiers.put(clientName, clientIdentifier);
 		}

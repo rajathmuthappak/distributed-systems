@@ -4,11 +4,18 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -16,19 +23,22 @@ import java.net.Socket;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 public class DummyClient {
 
 	private JFrame frame;
+	private JFrame popupFrame;
 	private JTextField createDirTextField;
 	private JTextField deleteDirTextField;
 	private JTextField renameDirToTextField;
@@ -351,71 +361,130 @@ public class DummyClient {
 		separator_3.setBounds(10, 438, 505, 2);
 		frame.getContentPane().add(separator_3);
 
-		// BROWSE USER DIRECTORY CODE
-		JButton syncServerFilesBtn = new JButton("SYNC SERVER FILES");
-		syncServerFilesBtn.setBounds(52, 519, 129, 36);
-		syncServerFilesBtn.addActionListener(new ActionListener() {
+		// 5. DES-YNC Folder
+		JTextField deSyncTextField = new JTextField();
+		deSyncTextField.setText("Enter the Directory name to be created");
+		deSyncTextField.setForeground(Color.GRAY);
+		deSyncTextField.setColumns(10);
+		deSyncTextField.setBounds(29, 451, 305, 26);
+		frame.getContentPane().add(deSyncTextField);
+
+		JButton deSyncServerFolderBtn = new JButton("DE-SYNC FOLDER");
+		deSyncServerFolderBtn.setBounds(369, 449, 146, 23);
+		frame.getContentPane().add(deSyncServerFolderBtn);
+
+		JSeparator separator_5 = new JSeparator();
+		separator_5.setBounds(10, 502, 505, 2);
+		frame.getContentPane().add(separator_5);
+
+		// 6. SYNC SERVER DIRECTORY CODE
+		JButton syncServerDirectoryBtn = new JButton("SYNC SERVER DIRECTORY ");
+		syncServerDirectoryBtn.setBounds(30, 510, 190, 36);
+		syncServerDirectoryBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("clicked");
+				try {
 
-				SwingUtilities.invokeLater(new Runnable() {
+					popupFrame = new JFrame();
+					popupFrame.setBounds(100, 100, 275, 380);
+					popupFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					popupFrame.getContentPane().setLayout(null);
 
-					@Override
-					public void run() {
-//						new SyncServerDirectory(clientName ,"");
-					}
-				});
+					JCheckBox hd1CheckBox = new JCheckBox("home_Directory_1");
+					hd1CheckBox.setBounds(30, 88, 140, 23);
+					popupFrame.getContentPane().add(hd1CheckBox);
+
+					JCheckBox hd2CheckBox = new JCheckBox("home_Directory_2");
+					hd2CheckBox.setBounds(30, 141, 140, 23);
+					popupFrame.getContentPane().add(hd2CheckBox);
+
+					JCheckBox hd3CheckBox = new JCheckBox("home_Directory_3");
+					hd3CheckBox.setBounds(30, 189, 140, 23);
+					popupFrame.getContentPane().add(hd3CheckBox);
+
+					JButton syncBtn = new JButton("SYNC");
+					syncBtn.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							if (hd1CheckBox.isSelected()) {
+								System.out.println("hd1 selected");
+							}
+							if (hd2CheckBox.isSelected()) {
+								System.out.println("hd2 selected");
+							}
+							if (hd3CheckBox.isSelected()) {
+								System.out.println("hd3 selected");
+							}
+							popupFrame.setVisible(false);
+						}
+					});
+					syncBtn.setBounds(38, 244, 89, 23);
+					popupFrame.getContentPane().add(syncBtn);
+
+					JButton cancelBtn = new JButton("CANCEL");
+					cancelBtn.setBounds(139, 244, 89, 23);
+					popupFrame.getContentPane().add(cancelBtn);
+
+					JLabel syncLabel = new JLabel("SYNC SERVER DIRECTORIES");
+					syncLabel.setFont(new Font("Tahoma", Font.BOLD, 13));
+					syncLabel.setHorizontalAlignment(SwingConstants.CENTER);
+					syncLabel.setBounds(10, 27, 218, 41);
+					popupFrame.getContentPane().add(syncLabel);
+
+					popupFrame.setVisible(true);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
-		frame.getContentPane().add(syncServerFilesBtn);
+		frame.getContentPane().add(syncServerDirectoryBtn);
 
 		// BROWSE USER DIRECTORY CODE
-				JButton browseBtn = new JButton("BROWSE ");
-				browseBtn.setBounds(245, 519, 123, 36);
-				browseBtn.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						// Browse directory instructions sent to server on click of Browse button
-						try {
-							dataOutputStream.writeUTF("BROWSE_DIRECTORY ");
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
+		JButton browseBtn = new JButton("BROWSE ");
+		browseBtn.setBounds(240, 510, 130, 36);
+		browseBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Browse directory instructions sent to server on click of Browse button
+				try {
+					dataOutputStream.writeUTF("BROWSE_DIRECTORY ");
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				JFileChooser jFileChooser = new JFileChooser(Constants.ROOT + clientName);
+				jFileChooser.getFileView();
+				disableUpFolderButton(jFileChooser);
+				jFileChooser.showSaveDialog(null);
+
+			}
+
+			// https://www.coderanch.com/t/468663/java/Disabling-Enabling-level-button-folder
+			// Method to disable buttons in the jFileChooser explorer window
+			public void disableUpFolderButton(Container c) {
+				int len = c.getComponentCount();
+				for (int i = 0; i < len; i++) {
+					Component comp = c.getComponent(i);
+					if (comp instanceof JButton) {
+						JButton b = (JButton) comp;
+						Icon icon = b.getIcon();
+						if (icon != null && (icon == UIManager.getIcon("FileChooser.detailsViewIcon")
+								|| icon == UIManager.getIcon("FileChooser.homeFolderIcon")
+								|| icon == UIManager.getIcon("FileChooser.listViewIcon")
+								|| icon == UIManager.getIcon("FileChooser.newFolderIcon")
+								|| icon == UIManager.getIcon("FileChooser.upFolderIcon"))) {
+							b.setEnabled(false);
 						}
-						JFileChooser jFileChooser = new JFileChooser(Constants.ROOT + clientName);
-						jFileChooser.getFileView();
-						disableUpFolderButton(jFileChooser);
-						jFileChooser.showSaveDialog(null);
-
+					} else if (comp instanceof Container) {
+						disableUpFolderButton((Container) comp);
 					}
+				}
 
-					// https://www.coderanch.com/t/468663/java/Disabling-Enabling-level-button-folder
-					// Method to disable buttons in the jFileChooser explorer window
-					public void disableUpFolderButton(Container c) {
-						int len = c.getComponentCount();
-						for (int i = 0; i < len; i++) {
-							Component comp = c.getComponent(i);
-							if (comp instanceof JButton) {
-								JButton b = (JButton) comp;
-								Icon icon = b.getIcon();
-								if (icon != null && (icon == UIManager.getIcon("FileChooser.detailsViewIcon")
-										|| icon == UIManager.getIcon("FileChooser.homeFolderIcon")
-										|| icon == UIManager.getIcon("FileChooser.listViewIcon")
-										|| icon == UIManager.getIcon("FileChooser.newFolderIcon")
-										|| icon == UIManager.getIcon("FileChooser.upFolderIcon"))) {
-									b.setEnabled(false);
-								}
-							} else if (comp instanceof Container) {
-								disableUpFolderButton((Container) comp);
-							}
-						}
+			}
+		});
+		frame.getContentPane().add(browseBtn);
 
-					}
-				});
-				frame.getContentPane().add(browseBtn);
-				
 		// DISCONNECT FROM SERVER CODE
 		JButton disconnectBtn = new JButton("DISCONNECT");
-		disconnectBtn.setBounds(392, 515, 123, 36);
+		disconnectBtn.setBounds(390, 510, 123, 36);
 		disconnectBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Disconnect instructions sent to server on click of disconnect button
@@ -452,20 +521,5 @@ public class DummyClient {
 		});
 		refreshButton.setBounds(751, 69, 89, 23);
 		frame.getContentPane().add(refreshButton);
-		
-		textField = new JTextField();
-		textField.setText("Enter the Directory name to be created");
-		textField.setForeground(Color.GRAY);
-		textField.setColumns(10);
-		textField.setBounds(29, 451, 305, 26);
-		frame.getContentPane().add(textField);
-		
-		JButton button = new JButton("CREATE DIRECTORY");
-		button.setBounds(369, 449, 146, 23);
-		frame.getContentPane().add(button);
-		
-		JSeparator separator_5 = new JSeparator();
-		separator_5.setBounds(10, 502, 505, 2);
-		frame.getContentPane().add(separator_5);
 	}
 }

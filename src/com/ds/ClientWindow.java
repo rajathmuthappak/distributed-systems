@@ -8,6 +8,7 @@ package com.ds;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,6 +38,7 @@ import javax.swing.UIManager;
 public class ClientWindow {
 
 	private JFrame frame;
+	private JFrame popupFrame;
 	private JTextField createDirTextField;
 	private JTextField deleteDirTextField;
 	private JTextField renameDirToTextField;
@@ -377,37 +380,92 @@ public class ClientWindow {
 		JSeparator separator_3 = new JSeparator();
 		separator_3.setBounds(10, 438, 505, 2);
 		frame.getContentPane().add(separator_3);
-		
-		// DES-YNC Folder
+
+		// 5. DES-YNC Folder
 		JTextField deSyncTextField = new JTextField();
 		deSyncTextField.setText("Enter the Directory name to be created");
 		deSyncTextField.setForeground(Color.GRAY);
 		deSyncTextField.setColumns(10);
 		deSyncTextField.setBounds(29, 451, 305, 26);
 		frame.getContentPane().add(deSyncTextField);
-		
-		JButton button = new JButton("DE-SYNC FOLDER");
-		button.setBounds(369, 449, 146, 23);
-		frame.getContentPane().add(button);
-		
+
+		JButton deSyncServerFolderBtn = new JButton("DE-SYNC FOLDER");
+		deSyncServerFolderBtn.setBounds(369, 449, 146, 23);
+		frame.getContentPane().add(deSyncServerFolderBtn);
+
 		JSeparator separator_5 = new JSeparator();
 		separator_5.setBounds(10, 502, 505, 2);
 		frame.getContentPane().add(separator_5);
 
-		// SYNC SERVER DIRECTORY CODE
-		JButton syncServerDirectory = new JButton("SYNC SERVER DIRECTORY ");
-		syncServerDirectory.setBounds(30, 510, 190, 36);
-		syncServerDirectory.addActionListener(new ActionListener() {
+		// 6. SYNC SERVER DIRECTORY CODE
+		JButton syncServerDirectoryBtn = new JButton("SYNC SERVER DIRECTORY ");
+		syncServerDirectoryBtn.setBounds(30, 510, 190, 36);
+		syncServerDirectoryBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					dataOutputStream.writeUTF("SYNC SERVER ");
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
+					popupFrame = new JFrame();
+					popupFrame.setBounds(100, 100, 275, 380);
+					popupFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					popupFrame.getContentPane().setLayout(null);
+
+					JCheckBox hd1CheckBox = new JCheckBox("home_Directory_1");
+					hd1CheckBox.setBounds(30, 88, 140, 23);
+					popupFrame.getContentPane().add(hd1CheckBox);
+
+					JCheckBox hd2CheckBox = new JCheckBox("home_Directory_2");
+					hd2CheckBox.setBounds(30, 141, 140, 23);
+					popupFrame.getContentPane().add(hd2CheckBox);
+
+					JCheckBox hd3CheckBox = new JCheckBox("home_Directory_3");
+					hd3CheckBox.setBounds(30, 189, 140, 23);
+					popupFrame.getContentPane().add(hd3CheckBox);
+
+					JButton syncBtn = new JButton("SYNC");
+					syncBtn.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							StringBuffer directoryName = new StringBuffer();
+							if (hd1CheckBox.isSelected()) {
+								directoryName.append("home_Directory_1/");
+							}
+							if (hd2CheckBox.isSelected()) {
+								directoryName.append("home_Directory_2/");
+							}
+							if (hd3CheckBox.isSelected()) {
+								directoryName.append("home_Directory_3/");
+							}
+							try {
+								dataOutputStream.writeUTF("SYNC_DIRECTORY " + directoryName);
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+							popupFrame.setVisible(false);
+						}
+					});
+					syncBtn.setBounds(38, 244, 89, 23);
+					popupFrame.getContentPane().add(syncBtn);
+
+					JButton cancelBtn = new JButton("CANCEL");
+					cancelBtn.setBounds(139, 244, 89, 23);
+					cancelBtn.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							popupFrame.setVisible(false);
+						}
+					});
+					popupFrame.getContentPane().add(cancelBtn);
+
+					JLabel syncLabel = new JLabel("SYNC SERVER DIRECTORIES");
+					syncLabel.setFont(new Font("Tahoma", Font.BOLD, 13));
+					syncLabel.setHorizontalAlignment(SwingConstants.CENTER);
+					syncLabel.setBounds(10, 27, 218, 41);
+					popupFrame.getContentPane().add(syncLabel);
+					popupFrame.setVisible(true);
+					updateDirectoryView(Constants.ROOT + clientName);
+				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
 		});
-		frame.getContentPane().add(syncServerDirectory);
+		frame.getContentPane().add(syncServerDirectoryBtn);
 
 		// BROWSE USER DIRECTORY CODE
 		JButton browseBtn = new JButton("BROWSE ");
@@ -418,7 +476,6 @@ public class ClientWindow {
 				try {
 					dataOutputStream.writeUTF("BROWSE_DIRECTORY ");
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				JFileChooser jFileChooser = new JFileChooser(Constants.ROOT + clientName);
@@ -505,7 +562,6 @@ public class ClientWindow {
 	// https://www.geeksforgeeks.org/java-program-list-files-directory-nested-sub-directories-recursive-approach/
 	private void updateDirectoryView(String rootPath) {
 		directoryListViewTextArea.setText("");
-		// TODO Auto-generated method stub
 		File rootDir = new File(rootPath);
 
 		if (rootDir.exists() && rootDir.isDirectory()) {

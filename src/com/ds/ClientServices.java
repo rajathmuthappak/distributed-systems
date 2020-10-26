@@ -83,17 +83,17 @@ public class ClientServices extends Thread {
 					break;
 				case "SYNC_DIRECTORY":
 					System.out.println(clientRequest.substring(command.length(), clientRequest.length()).trim());
-					ArrayList<String> listOfLocalDirectories = new ArrayList<String>(Arrays
-							.asList(clientRequest.substring(command.length(), clientRequest.length()).split("/")));
-					Server.clientDirectories.put(clientName, listOfLocalDirectories);
-					syncDirectory(listOfLocalDirectories);
-					Server.serverLogsTextArea.append(clientName + " : BROWSE_DIRECTORY \n");
+					String[] syncDirectories = clientRequest.substring(command.length(), clientRequest.length()).trim()
+							.split("/");
+					Server.serverLogsTextArea.append(clientName + " : SYNC_DIRECTORY "+syncDirectories+"\n");
+					Server.clientDirectories.put(clientName, Arrays.asList(syncDirectories));
+					syncDirectory(syncDirectories);
 					break;
-					
+
 				case "DESYNC_DIRECTORY":
 					System.out.println(clientRequest.substring(command.length(), clientRequest.length()).trim());
 					deSyncDirectory();
-					Server.serverLogsTextArea.append(clientName + " : BROWSE_DIRECTORY \n");
+					Server.serverLogsTextArea.append(clientName + " : DE_SYNC_DIRECTORY \n");
 					break;
 
 				case "DISCONNECT":
@@ -122,7 +122,7 @@ public class ClientServices extends Thread {
 
 	private void deSyncDirectory() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -190,26 +190,26 @@ public class ClientServices extends Thread {
 	 * @param newPath
 	 * @throws IOException
 	 */
-	private void syncDirectory(ArrayList<String> listOfLocalDirectories) throws IOException {
-		
-//		for(String directoryName : listOfLocalDirectories) {
-//			
-//		}
-//		File serverFolder = new File(Constants.ROOT + directoryName + "/");
-//		File clientFolder = new File(Constants.ROOT + clientName + "/copy_" + directoryName);
-//		try {
-//			if (serverFolder.exists()) {
-//				FileUtils.copyDirectory(serverFolder, clientFolder, true);
-//				Server.serverLogsTextArea.append(clientName + " : " + directoryName + "   Copy Successful \n");
-//				dataOutputStream.writeUTF("Move Successful");
-//			} else {
-//				Server.serverLogsTextArea.append(clientName + " : Move Failed. Directory does not exist \n");
-//				dataOutputStream.writeUTF("Move Failed. Directory does not exist");
-//			}
-//		} catch (Exception e) {
-//			Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
-//			dataOutputStream.writeUTF(e.getMessage());
-//		}
+	private void syncDirectory(String[] syncDirectories) throws IOException {
+
+		for (String directoryName : syncDirectories) {
+			File serverFolder = new File(Constants.ROOT + "SERVER/"+ directoryName + "/");
+			File clientFolder = new File(Constants.ROOT + clientName + "/" + Server.clientIdentifiers.get(clientName)
+					+ "/copy_" + directoryName);
+			try {
+				if (serverFolder.exists()) {
+					FileUtils.copyDirectory(serverFolder, clientFolder, true);
+					Server.serverLogsTextArea.append(clientName + " : " + directoryName + "   Copy Successful \n");
+					dataOutputStream.writeUTF("Move Successful");
+				} else {
+					Server.serverLogsTextArea.append(clientName + " : Move Failed. Directory does not exist \n");
+					dataOutputStream.writeUTF("Move Failed. Directory does not exist");
+				}
+			} catch (Exception e) {
+				Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
+				dataOutputStream.writeUTF(e.getMessage());
+			}
+		}
 	}
 
 	/**
