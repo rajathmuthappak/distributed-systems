@@ -90,7 +90,7 @@ public class ClientWindow {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 895, 605);
+		frame.setBounds(100, 100, 895, 562);
 		// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
@@ -377,41 +377,10 @@ public class ClientWindow {
 		JSeparator separator_3 = new JSeparator();
 		separator_3.setBounds(10, 438, 505, 2);
 		frame.getContentPane().add(separator_3);
-		
-		// DES-YNC Folder
-		JTextField deSyncTextField = new JTextField();
-		deSyncTextField.setText("Enter the Directory name to be created");
-		deSyncTextField.setForeground(Color.GRAY);
-		deSyncTextField.setColumns(10);
-		deSyncTextField.setBounds(29, 451, 305, 26);
-		frame.getContentPane().add(deSyncTextField);
-		
-		JButton button = new JButton("DE-SYNC FOLDER");
-		button.setBounds(369, 449, 146, 23);
-		frame.getContentPane().add(button);
-		
-		JSeparator separator_5 = new JSeparator();
-		separator_5.setBounds(10, 502, 505, 2);
-		frame.getContentPane().add(separator_5);
-
-		// SYNC SERVER DIRECTORY CODE
-		JButton syncServerDirectory = new JButton("SYNC SERVER DIRECTORY ");
-		syncServerDirectory.setBounds(30, 510, 190, 36);
-		syncServerDirectory.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					dataOutputStream.writeUTF("SYNC SERVER ");
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
-		frame.getContentPane().add(syncServerDirectory);
 
 		// BROWSE USER DIRECTORY CODE
 		JButton browseBtn = new JButton("BROWSE ");
-		browseBtn.setBounds(240, 510, 130, 36);
+		browseBtn.setBounds(107, 468, 123, 36);
 		browseBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Browse directory instructions sent to server on click of Browse button
@@ -455,7 +424,7 @@ public class ClientWindow {
 
 		// DISCONNECT FROM SERVER CODE
 		JButton disconnectBtn = new JButton("DISCONNECT");
-		disconnectBtn.setBounds(390, 510, 123, 36);
+		disconnectBtn.setBounds(306, 468, 123, 36);
 		disconnectBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Disconnect instructions sent to server on click of disconnect button
@@ -476,7 +445,7 @@ public class ClientWindow {
 
 		directoryListViewTextArea = new TextArea();
 		directoryListViewTextArea.setBackground(Color.WHITE);
-		directoryListViewTextArea.setBounds(566, 99, 303, 443);
+		directoryListViewTextArea.setBounds(566, 99, 303, 405);
 		directoryListViewTextArea.setEditable(false);
 		frame.getContentPane().add(directoryListViewTextArea);
 

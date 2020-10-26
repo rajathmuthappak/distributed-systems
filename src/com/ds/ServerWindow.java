@@ -6,34 +6,29 @@
 package com.ds;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.Socket;
+import java.nio.file.Files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
-public class ClientWindow {
+import org.apache.commons.io.FileUtils;
+
+public class ServerWindow {
 
 	private JFrame frame;
 	private JTextField createDirTextField;
@@ -44,43 +39,20 @@ public class ClientWindow {
 	private JTextField moveDirToTextField;
 	private TextArea directoryListViewTextArea;
 	private JLabel clientLabel;
-	private String clientName;
+	private String server;
 	private DataOutputStream dataOutputStream;
-	private DataInputStream dataInputStream;
-	private Socket socket;
 
 	/**
 	 * Create the application.
 	 */
-	public ClientWindow(String clientName) {
-		this.clientName = clientName;
+	public ServerWindow(String server) {
+		this.server = server;
 		try {
-			// https://www.geeksforgeeks.org/introducing-threads-socket-programming-java/
-			socket = new Socket(Constants.SERVER_IP_ADDRESS, Constants.SERVER_PORT);
-			dataOutputStream = new DataOutputStream(socket.getOutputStream());
-			dataOutputStream.writeUTF(clientName);
-			dataInputStream = new DataInputStream(socket.getInputStream());
-			String message = dataInputStream.readUTF();
-			if (message.contains("Client Already Connected..!!")) {
-				JOptionPane.showMessageDialog(null, message);
-				// https://stackoverflow.com/questions/17018857/how-to-call-jframe-from-another-java-class
-				// Invoke the client connection window for client to reconnect to the server
-				SwingUtilities.invokeLater(new Runnable() {
-
-					@Override
-					public void run() {
-						new ClientConnection();
-					}
-				});
-			} else {
-				// invoke the client window for it to send and receive instructions from/to
-				// server
-				initialize();
-				frame.setVisible(true);
-				System.out.println("connected");
-
-			}
-		} catch (IOException e1) {
+			// invoke the client window for it to send and receive instructions from/to
+			// server
+			initialize();
+			frame.setVisible(true);
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 	}
@@ -90,11 +62,11 @@ public class ClientWindow {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 895, 605);
+		frame.setBounds(100, 100, 895, 562);
 		// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
-		clientLabel = new JLabel("Client : " + clientName);
+		clientLabel = new JLabel("SERVER");
 		clientLabel.setForeground(Color.BLACK);
 		clientLabel.setBackground(Color.LIGHT_GRAY);
 		clientLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -138,12 +110,13 @@ public class ClientWindow {
 							|| createDirTextField.getText().toString().trim().length() == 0) {
 						JOptionPane.showMessageDialog(null, "Invalid Folder Name or Directory structure");
 					} else {
-						dataOutputStream.writeUTF("CREATE_DIRECTORY " + createDirTextField.getText().toString().trim());
+						Server.serverLogsTextArea.append(
+								"SERVER : CREATE_DIRECTORY ->" + createDirTextField.getText().toString().trim() + "\n");
+						createDirectory(createDirTextField.getText().toString().trim());
 						createDirTextField.setText("");
-						JOptionPane.showMessageDialog(null, dataInputStream.readUTF());
 					}
-					updateDirectoryView(Constants.ROOT + clientName);
-				} catch (IOException e1) {
+					updateDirectoryView(Constants.ROOT + server);
+				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -194,12 +167,13 @@ public class ClientWindow {
 							|| deleteDirTextField.getText().toString().trim().length() == 0) {
 						JOptionPane.showMessageDialog(null, "Invalid Folder Name or Directory structure");
 					} else {
-						dataOutputStream.writeUTF("DELETE_DIRECTORY " + deleteDirTextField.getText().toString().trim());
+						Server.serverLogsTextArea.append(
+								"SERVER : DELETE_DIRECTORY ->" + deleteDirTextField.getText().toString().trim() + "\n");
+						deleteDirectory(deleteDirTextField.getText().toString().trim());
 						deleteDirTextField.setText("");
-						JOptionPane.showMessageDialog(null, dataInputStream.readUTF());
 					}
-					updateDirectoryView(Constants.ROOT + clientName);
-				} catch (IOException e1) {
+					updateDirectoryView(Constants.ROOT + server);
+				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -275,16 +249,16 @@ public class ClientWindow {
 							&& !isValidFolderOrPath(renameDirToTextField.getText().toString().trim())) {
 						JOptionPane.showMessageDialog(null, "Invalid Folder Name or Directory structure");
 					} else {
-						dataOutputStream
-								.writeUTF("RENAME_DIRECTORY " + renameDirFromTextField.getText().toString().trim() + ":"
-										+ renameDirToTextField.getText().toString().trim());
-						JOptionPane.showMessageDialog(null, dataInputStream.readUTF());
-
+						Server.serverLogsTextArea.append(
+								"SERVER : RENAME_DIRECTORY " + renameDirFromTextField.getText().toString().trim() + ":"
+										+ renameDirToTextField.getText().toString().trim() + "\n");
+						renameDirectory(renameDirFromTextField.getText().toString().trim(),
+								renameDirToTextField.getText().toString().trim());
 					}
 					renameDirFromTextField.setText("");
 					renameDirToTextField.setText("");
-					updateDirectoryView(Constants.ROOT + clientName);
-				} catch (IOException e1) {
+					updateDirectoryView(Constants.ROOT + server);
+				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -360,14 +334,16 @@ public class ClientWindow {
 							&& !isValidFolderOrPath(moveDirToTextField.getText().toString().trim())) {
 						JOptionPane.showMessageDialog(null, "Invalid Folder Name or Directory structure");
 					} else {
-						dataOutputStream.writeUTF("MOVE_DIRECTORY " + moveDirFromTextField.getText().toString().trim()
-								+ ":" + moveDirToTextField.getText().toString().trim());
-						JOptionPane.showMessageDialog(null, dataInputStream.readUTF());
+						Server.serverLogsTextArea
+								.append("SERVER : MOVE_DIRECTORY " + moveDirFromTextField.getText().toString().trim()
+										+ ":" + moveDirToTextField.getText().toString().trim() + "\n");
+						moveDirectory(moveDirFromTextField.getText().toString().trim(),
+								moveDirToTextField.getText().toString().trim());
 					}
 					moveDirFromTextField.setText("");
 					moveDirToTextField.setText("");
-					updateDirectoryView(Constants.ROOT + clientName);
-				} catch (IOException e1) {
+					updateDirectoryView(Constants.ROOT + server);
+				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -377,98 +353,16 @@ public class ClientWindow {
 		JSeparator separator_3 = new JSeparator();
 		separator_3.setBounds(10, 438, 505, 2);
 		frame.getContentPane().add(separator_3);
-		
-		// DES-YNC Folder
-		JTextField deSyncTextField = new JTextField();
-		deSyncTextField.setText("Enter the Directory name to be created");
-		deSyncTextField.setForeground(Color.GRAY);
-		deSyncTextField.setColumns(10);
-		deSyncTextField.setBounds(29, 451, 305, 26);
-		frame.getContentPane().add(deSyncTextField);
-		
-		JButton button = new JButton("DE-SYNC FOLDER");
-		button.setBounds(369, 449, 146, 23);
-		frame.getContentPane().add(button);
-		
-		JSeparator separator_5 = new JSeparator();
-		separator_5.setBounds(10, 502, 505, 2);
-		frame.getContentPane().add(separator_5);
-
-		// SYNC SERVER DIRECTORY CODE
-		JButton syncServerDirectory = new JButton("SYNC SERVER DIRECTORY ");
-		syncServerDirectory.setBounds(30, 510, 190, 36);
-		syncServerDirectory.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					dataOutputStream.writeUTF("SYNC SERVER ");
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
-		frame.getContentPane().add(syncServerDirectory);
-
-		// BROWSE USER DIRECTORY CODE
-		JButton browseBtn = new JButton("BROWSE ");
-		browseBtn.setBounds(240, 510, 130, 36);
-		browseBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// Browse directory instructions sent to server on click of Browse button
-				try {
-					dataOutputStream.writeUTF("BROWSE_DIRECTORY ");
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				JFileChooser jFileChooser = new JFileChooser(Constants.ROOT + clientName);
-				jFileChooser.getFileView();
-				disableUpFolderButton(jFileChooser);
-				jFileChooser.showSaveDialog(null);
-
-			}
-
-			// https://www.coderanch.com/t/468663/java/Disabling-Enabling-level-button-folder
-			// Method to disable buttons in the jFileChooser explorer window
-			public void disableUpFolderButton(Container c) {
-				int len = c.getComponentCount();
-				for (int i = 0; i < len; i++) {
-					Component comp = c.getComponent(i);
-					if (comp instanceof JButton) {
-						JButton b = (JButton) comp;
-						Icon icon = b.getIcon();
-						if (icon != null && (icon == UIManager.getIcon("FileChooser.detailsViewIcon")
-								|| icon == UIManager.getIcon("FileChooser.homeFolderIcon")
-								|| icon == UIManager.getIcon("FileChooser.listViewIcon")
-								|| icon == UIManager.getIcon("FileChooser.newFolderIcon")
-								|| icon == UIManager.getIcon("FileChooser.upFolderIcon"))) {
-							b.setEnabled(false);
-						}
-					} else if (comp instanceof Container) {
-						disableUpFolderButton((Container) comp);
-					}
-				}
-
-			}
-		});
-		frame.getContentPane().add(browseBtn);
 
 		// DISCONNECT FROM SERVER CODE
-		JButton disconnectBtn = new JButton("DISCONNECT");
-		disconnectBtn.setBounds(390, 510, 123, 36);
-		disconnectBtn.addActionListener(new ActionListener() {
+		JButton closeBtn = new JButton("CLOSE");
+		closeBtn.setBounds(306, 468, 123, 36);
+		closeBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Disconnect instructions sent to server on click of disconnect button
-				try {
-					dataOutputStream.writeUTF("DISCONNECT ");
-					frame.dispose();
-					System.exit(0);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+				frame.dispose();
 			}
 		});
-		frame.getContentPane().add(disconnectBtn);
+		frame.getContentPane().add(closeBtn);
 
 		JSeparator separator_4 = new JSeparator();
 		separator_4.setBounds(10, 69, 505, 2);
@@ -476,7 +370,7 @@ public class ClientWindow {
 
 		directoryListViewTextArea = new TextArea();
 		directoryListViewTextArea.setBackground(Color.WHITE);
-		directoryListViewTextArea.setBounds(566, 99, 303, 443);
+		directoryListViewTextArea.setBounds(566, 99, 303, 405);
 		directoryListViewTextArea.setEditable(false);
 		frame.getContentPane().add(directoryListViewTextArea);
 
@@ -488,12 +382,12 @@ public class ClientWindow {
 		JButton refreshButton = new JButton("Refresh");
 		refreshButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				updateDirectoryView(Constants.ROOT + clientName);
+				updateDirectoryView(Constants.ROOT + server);
 			}
 		});
 		refreshButton.setBounds(751, 69, 89, 23);
 		frame.getContentPane().add(refreshButton);
-		updateDirectoryView(Constants.ROOT + clientName);
+		updateDirectoryView(Constants.ROOT + server);
 	}
 
 	/**
@@ -505,7 +399,6 @@ public class ClientWindow {
 	// https://www.geeksforgeeks.org/java-program-list-files-directory-nested-sub-directories-recursive-approach/
 	private void updateDirectoryView(String rootPath) {
 		directoryListViewTextArea.setText("");
-		// TODO Auto-generated method stub
 		File rootDir = new File(rootPath);
 
 		if (rootDir.exists() && rootDir.isDirectory()) {
@@ -514,7 +407,7 @@ public class ClientWindow {
 			File arr[] = rootDir.listFiles();
 
 			directoryListViewTextArea.append("**********************************************\n");
-			directoryListViewTextArea.append("Files from main directory : " + rootDir + "\n");
+			directoryListViewTextArea.append("Files from server directory : \n");
 			directoryListViewTextArea.append("**********************************************\n");
 
 			// Calling recursive method
@@ -562,6 +455,119 @@ public class ClientWindow {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Method to create the directory specified by the client
+	 * 
+	 * @param directory
+	 * @throws IOException
+	 */
+	private void createDirectory(String directory) throws IOException {
+		try {
+			if (new File(Constants.ROOT + server + "/" + directory).exists()) {
+				Server.serverLogsTextArea.append(server + " : Directory Creation Failed \n");
+			} else {
+				new File(Constants.ROOT + server + "/" + directory).mkdirs();
+				Server.serverLogsTextArea.append(server + " : Directory Creation Successful \n");
+			}
+		} catch (Exception e) {
+			Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
+			dataOutputStream.writeUTF(e.getMessage());
+		}
+
+	}
+
+	/**
+	 * Method to delete the directory as specified by the client
+	 * 
+	 * @param directory
+	 * @throws IOException
+	 */
+
+	private void deleteDirectory(String directory) throws IOException {
+		try {
+			if (new File(Constants.ROOT + server + "/" + directory).exists()) {
+				deleteDir(new File(Constants.ROOT + server + "/" + directory));
+				Server.serverLogsTextArea.append(server + " : Deletion Successful \n");
+			} else {
+				Server.serverLogsTextArea.append(server + " : Deletion Failed \n");
+			}
+		} catch (Exception e) {
+			Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
+			dataOutputStream.writeUTF(e.getMessage().toString());
+		}
+
+	}
+
+	/**
+	 * Method to delete any nested files and folders within the specified directory
+	 * 
+	 * @param file
+	 */
+	// https://stackoverflow.com/questions/20281835/how-to-delete-a-folder-with-files-using-java
+	void deleteDir(File file) {
+		File[] contents = file.listFiles();
+		if (contents != null) {
+			for (File f : contents) {
+				if (!Files.isSymbolicLink(f.toPath())) {
+					deleteDir(f);
+				}
+			}
+		}
+		file.delete();
+	}
+
+	/**
+	 * Method to move the Folder from one directory to another as specified by the
+	 * client
+	 * 
+	 * @param oldPath
+	 * @param newPath
+	 * @throws IOException
+	 */
+	// https://www.studytrails.com/java-io/file-copying-and-moving-deleting/
+	private void moveDirectory(String oldPath, String newPath) throws IOException {
+		Server.serverLogsTextArea.append(server + " : MOVE_DIRECTORY " + Constants.ROOT + server + "/" + oldPath
+				+ " -> " + Constants.ROOT + server + "/" + newPath + "/ \n");
+		File oldFolder = new File(Constants.ROOT + server + "/" + oldPath);
+		File newFolder = new File(Constants.ROOT + server + "/" + newPath);
+		try {
+			if (oldFolder.exists()) {
+				FileUtils.moveDirectoryToDirectory(oldFolder, newFolder, true);
+				Server.serverLogsTextArea.append(server + " : Move Successful \n");
+			} else {
+				Server.serverLogsTextArea.append(server + " : Move Failed. Directory does not exist \n");
+			}
+		} catch (Exception e) {
+			Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
+		}
+	}
+
+	/**
+	 * Method to rename the directory to the name specified by the client
+	 * 
+	 * @param oldFolderName
+	 * @param newFolderName
+	 * @throws IOException
+	 */
+
+	// https://stackoverflow.com/questions/48339967/how-to-rename-the-folder-in-java
+	private void renameDirectory(String oldFolderName, String newFolderName) throws IOException {
+		File oldFolder = new File(Constants.ROOT + server + "/" + oldFolderName);
+		File newFolder = new File(Constants.ROOT + server + "/" + newFolderName);
+		try {
+			if (oldFolder.exists()) {
+				oldFolder.renameTo(newFolder);
+				Server.serverLogsTextArea.append(server + " : Rename Successful \n");
+			} else {
+				Server.serverLogsTextArea.append(server + " : Rename Failed. Directory does not exist \n");
+			}
+		} catch (Exception e) {
+			Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
+			dataOutputStream.writeUTF(e.getMessage());
+		}
+
 	}
 
 }

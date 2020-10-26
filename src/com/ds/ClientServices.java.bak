@@ -45,9 +45,7 @@ public class ClientServices extends Thread {
 				clientRequest = dataInputStream.readUTF();
 				System.out.println("client request " + clientRequest);
 				String command = clientRequest.substring(0, clientRequest.indexOf(" "));
-
 				switch (command) {
-
 				case "CREATE_DIRECTORY":
 					String createDirectoryPath = clientRequest.substring(command.length(), clientRequest.length())
 							.trim();
@@ -55,7 +53,6 @@ public class ClientServices extends Thread {
 							.append(clientName + " : CREATE_DIRECTORY -> " + createDirectoryPath + "\n");
 					createDirectory(createDirectoryPath);
 					break;
-
 				case "DELETE_DIRECTORY":
 					String deleteDirectoryPath = clientRequest.substring(command.length(), clientRequest.length())
 							.trim();
@@ -63,14 +60,12 @@ public class ClientServices extends Thread {
 							.append(clientName + " : DELETE_DIRECTORY -> " + deleteDirectoryPath + "\n");
 					deleteDirectory(deleteDirectoryPath);
 					break;
-
 				case "MOVE_DIRECTORY":
 					String oldPath = clientRequest.substring(command.length(), clientRequest.indexOf(":")).trim();
 					String newPath = clientRequest.substring(clientRequest.indexOf(":") + 1).trim();
 					Server.serverLogsTextArea.append(clientName + " : MOVE_DIRECTORY " + oldPath + " -> " + newPath);
 					moveDirectory(oldPath, newPath);
 					break;
-
 				case "RENAME_DIRECTORY":
 					String oldFolder = clientRequest.substring(command.length(), clientRequest.indexOf(":")).trim();
 					String newFolder = clientRequest.substring(clientRequest.indexOf(":") + 1).trim();
@@ -95,7 +90,6 @@ public class ClientServices extends Thread {
 					deSyncDirectory();
 					Server.serverLogsTextArea.append(clientName + " : BROWSE_DIRECTORY \n");
 					break;
-
 				case "DISCONNECT":
 					Server.serverLogsTextArea.append(clientName + " : DISCONNECTED \n");
 					Iterator<String> iterator = Server.listOfClients.iterator();
