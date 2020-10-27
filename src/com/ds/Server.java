@@ -16,11 +16,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -31,12 +35,22 @@ import javax.swing.SwingUtilities;
 public class Server {
 
 	private JFrame frame;
+	// To maintain a list of connected clients
 	public static List<String> listOfClients = new ArrayList<String>();
+	// To maintain a map of client names and ther identifiers.
 	public static Map<String, String> clientIdentifiers = new HashMap<String, String>();
 
-	public static Map<String, List<String>> clientDirectories = new HashMap<String, List<String>>();
-
-	public static Map<String, ArrayList<String>> clientLocalDirectory;
+	// Map to maintain the list of synchronized paths for each server directory.
+	public static Map<String, Set<String>> clientDirectories = new HashMap<String, Set<String>>();
+	/**
+	 * Initializing the map with a key values. i.e. the Directories available for
+	 * synchronization at SERVER side
+	 */
+	static {
+		clientDirectories.put("home_Directory_1", new HashSet<String>());
+		clientDirectories.put("home_Directory_2", new HashSet<String>());
+		clientDirectories.put("home_Directory_3", new HashSet<String>());
+	};
 
 	private static ServerSocket serverSocket;
 	private static TextArea listOfClientsTextField;
@@ -70,7 +84,6 @@ public class Server {
 				DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
 				DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
 				String clientName = dataInputStream.readUTF();
-				System.out.println("clint name " + clientName);
 				// check to see if the client is already connected
 				if (listOfClients.contains(clientName)) {
 					dataOutputStream.writeUTF(Constants.CLIENT_ALREADY_CONNECTED);
@@ -79,7 +92,6 @@ public class Server {
 					// If the client disconnects from the server then close the socket and remove
 					// the client name from the list of clients
 					if (clientName.contains(Constants.DISCONNECT)) {
-						System.out.println(clientName.substring(clientName.indexOf(" ")));
 						Iterator<String> iterator = listOfClients.iterator();
 						while (iterator.hasNext()) {
 							if (iterator.next()
@@ -95,11 +107,9 @@ public class Server {
 							new File(Constants.ROOT + clientName).mkdirs();
 						}
 						dataOutputStream.writeUTF(Constants.ROOT + clientName);
-						System.out.printf(Constants.CLIENT_CONNECTED, clientName);
 						serverLogsTextArea.append("Client -> " + clientName + " CONNECTED. \n");
 						listOfClients.add(clientName);
 						updateClientList();
-						assignClientIdentifier(clientName);
 						// Start thread for a particular once a connection is established.
 						Thread clientThread = new ClientServices(dataInputStream, dataOutputStream, socket, clientName);
 						clientThread.start();
@@ -186,20 +196,6 @@ public class Server {
 		for (String client : listOfClients) {
 			listOfClientsTextField.append(client);
 			listOfClientsTextField.append("\n");
-		}
-	}
-
-	/**
-	 * Method accepts the client name and assigns an Identifier based on the number
-	 * of clients connected to the the server at that point. If an identifier is
-	 * already assigned no new assignment would be done.
-	 * 
-	 * @param clientName
-	 */
-	private static void assignClientIdentifier(String clientName) {
-		String clientIdentifier = listOfClients.size() % 3 == 1 ? "A" : listOfClients.size() % 3 == 2 ? "B" : "C";
-		if (!clientIdentifiers.containsKey(clientName)) {
-			clientIdentifiers.put(clientName, clientIdentifier);
 		}
 	}
 }

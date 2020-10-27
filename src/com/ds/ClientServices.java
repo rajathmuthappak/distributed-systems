@@ -12,9 +12,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
@@ -38,12 +39,12 @@ public class ClientServices extends Thread {
 	@Override
 	public void run() {
 
+		assignClientIdentifier();
 		String clientRequest;
 		stopCurrentThread: while (true) {
 			try {
 				// accept the client instruction for further execution
 				clientRequest = dataInputStream.readUTF();
-				System.out.println("client request " + clientRequest);
 				String command = clientRequest.substring(0, clientRequest.indexOf(" "));
 
 				switch (command) {
@@ -82,18 +83,19 @@ public class ClientServices extends Thread {
 					Server.serverLogsTextArea.append(clientName + " : BROWSE_DIRECTORY \n");
 					break;
 				case "SYNC_DIRECTORY":
-					System.out.println(clientRequest.substring(command.length(), clientRequest.length()).trim());
 					String[] syncDirectories = clientRequest.substring(command.length(), clientRequest.length()).trim()
 							.split("/");
-					Server.serverLogsTextArea.append(clientName + " : SYNC_DIRECTORY "+syncDirectories+"\n");
-					Server.clientDirectories.put(clientName, Arrays.asList(syncDirectories));
+					Server.serverLogsTextArea
+							.append(clientName + " : SYNC_DIRECTORY " + Arrays.toString(syncDirectories) + "\n");
 					syncDirectory(syncDirectories);
 					break;
 
-				case "DESYNC_DIRECTORY":
-					System.out.println(clientRequest.substring(command.length(), clientRequest.length()).trim());
-					deSyncDirectory();
-					Server.serverLogsTextArea.append(clientName + " : DE_SYNC_DIRECTORY \n");
+				case "DE-SYNC_DIRECTORY":
+					String[] deSyncDirectories = clientRequest.substring(command.length(), clientRequest.length())
+							.trim().split("/");
+					Server.serverLogsTextArea.append(
+							clientName + " : DE_SYNC_DIRECTORIES " + Arrays.toString(deSyncDirectories) + " \n");
+					deSyncDirectory(deSyncDirectories);
 					break;
 
 				case "DISCONNECT":
@@ -108,7 +110,6 @@ public class ClientServices extends Thread {
 					this.dataInputStream.close();
 					this.dataOutputStream.close();
 					this.socket.close();
-					System.out.println("DISCONNECT");
 					break stopCurrentThread;
 				}
 
@@ -120,9 +121,25 @@ public class ClientServices extends Thread {
 
 	}
 
-	private void deSyncDirectory() {
-		// TODO Auto-generated method stub
-
+	/**
+	 * Method used to de-sync the server folders. Accepts an array of Server folders
+	 * to be de-synced at the client end. We iterate through each directory and
+	 * remove the copy of the same from the clients local directory
+	 * 
+	 * @param deSyncDirectories
+	 * @throws IOException
+	 */
+	private void deSyncDirectory(String[] deSyncDirectories) throws IOException {
+		for (String desyncDirectory : deSyncDirectories) {
+			String localPath = Constants.ROOT + clientName + "/" + Server.clientIdentifiers.get(clientName) + "/copy_"
+					+ desyncDirectory;
+			deleteDirectory(Server.clientIdentifiers.get(clientName) + "/copy_" + desyncDirectory);
+			localPath = localPath.replace("/", "\\");
+			Set<String> directories = Server.clientDirectories.get(desyncDirectory);
+			directories.remove(localPath);
+			Server.clientDirectories.put(desyncDirectory, directories);
+		}
+		Server.serverLogsTextArea.append(clientName + " : De-Sync Successful \n");
 	}
 
 	/**
@@ -183,7 +200,7 @@ public class ClientServices extends Thread {
 	}
 
 	/**
-	 * Method to copy the Directory Folder from server to clients local directory
+	 * Method to Sync the Directory Folder from server to clients local directory
 	 * client
 	 * 
 	 * @param oldPath
@@ -193,9 +210,12 @@ public class ClientServices extends Thread {
 	private void syncDirectory(String[] syncDirectories) throws IOException {
 
 		for (String directoryName : syncDirectories) {
-			File serverFolder = new File(Constants.ROOT + "SERVER/"+ directoryName + "/");
+			File serverFolder = new File(Constants.ROOT + "SERVER/" + directoryName + "/");
 			File clientFolder = new File(Constants.ROOT + clientName + "/" + Server.clientIdentifiers.get(clientName)
 					+ "/copy_" + directoryName);
+			Set<String> mappedDirectories = Server.clientDirectories.get(directoryName);
+			mappedDirectories.add(clientFolder.getPath().toString());
+			Server.clientDirectories.put(directoryName, mappedDirectories);
 			try {
 				if (serverFolder.exists()) {
 					FileUtils.copyDirectory(serverFolder, clientFolder, true);
@@ -224,10 +244,10 @@ public class ClientServices extends Thread {
 			if (new File(Constants.ROOT + clientName + "/" + directory).exists()) {
 				deleteDir(new File(Constants.ROOT + clientName + "/" + directory));
 				dataOutputStream.writeUTF("Directory DELETED..!");
-				Server.serverLogsTextArea.append(clientName + " : Deletion Successful \n");
+				Server.serverLogsTextArea.append(clientName + " : Deletion/DeSync Successful \n");
 			} else {
-				dataOutputStream.writeUTF("Folder Does not exist");
-				Server.serverLogsTextArea.append(clientName + " : Deletion Failed \n");
+				dataOutputStream.writeUTF("Folder Does not exist Or Directory was not Synchronized");
+				Server.serverLogsTextArea.append(clientName + " : Deletion/DeSync Failed \n");
 			}
 		} catch (Exception e) {
 			Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
@@ -277,4 +297,18 @@ public class ClientServices extends Thread {
 
 	}
 
+	/**
+	 * Method accepts the client name and assigns an Identifier based on the number
+	 * of clients connected to the the server at that point. If an identifier is
+	 * already assigned no new assignment would be done.
+	 * 
+	 * @param clientName
+	 */
+	private void assignClientIdentifier() {
+		String clientIdentifier = Server.listOfClients.size() % 3 == 1 ? "A"
+				: Server.listOfClients.size() % 3 == 2 ? "B" : "C";
+		if (!Server.clientIdentifiers.containsKey(clientName)) {
+			Server.clientIdentifiers.put(clientName, clientIdentifier);
+		}
+	}
 }

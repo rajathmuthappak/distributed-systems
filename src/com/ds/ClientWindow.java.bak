@@ -80,6 +80,8 @@ public class ClientWindow {
 				// server
 				initialize();
 				frame.setVisible(true);
+				System.out.println("connected");
+
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -378,14 +380,24 @@ public class ClientWindow {
 		JSeparator separator_3 = new JSeparator();
 		separator_3.setBounds(10, 438, 505, 2);
 		frame.getContentPane().add(separator_3);
-		// 5. SYNC SERVER DIRECTORY CODE
+
+		// 5. DES-YNC Folder
+
+		JButton deSyncServerFolderBtn = new JButton("DE-SYNC SERVER DIRECTORY");
+		deSyncServerFolderBtn.setBounds(267, 451, 190, 36);
+		frame.getContentPane().add(deSyncServerFolderBtn);
+
+		JSeparator separator_5 = new JSeparator();
+		separator_5.setBounds(10, 502, 505, 2);
+		frame.getContentPane().add(separator_5);
+
+		// 6. SYNC SERVER DIRECTORY CODE
 		JButton syncServerDirectoryBtn = new JButton("SYNC SERVER DIRECTORY ");
-		syncServerDirectoryBtn.setBounds(39, 451, 190, 36);
+		syncServerDirectoryBtn.setBounds(30, 510, 190, 36);
 		syncServerDirectoryBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Display new Frame with a list of SERVER Directories
 				try {
-					popupFrame = new JFrame("SYNC SERVER DIRECTORIES");
+					popupFrame = new JFrame();
 					popupFrame.setBounds(100, 100, 275, 380);
 					popupFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					popupFrame.getContentPane().setLayout(null);
@@ -448,85 +460,10 @@ public class ClientWindow {
 			}
 		});
 		frame.getContentPane().add(syncServerDirectoryBtn);
-		JSeparator separator_5 = new JSeparator();
-		separator_5.setBounds(10, 502, 505, 2);
-		frame.getContentPane().add(separator_5);
-
-		// 6. DES-YNC Folder
-		JButton deSyncServerFolderBtn = new JButton("DE-SYNC SERVER DIRECTORY");
-		deSyncServerFolderBtn.setBounds(267, 451, 190, 36);
-		deSyncServerFolderBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					// Display new Frame with a list of SERVER Directories
-					popupFrame = new JFrame("DE-SYNC SERVER DIRECTORIES");
-					popupFrame.setBounds(100, 100, 275, 380);
-					popupFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-					popupFrame.getContentPane().setLayout(null);
-
-					JCheckBox hd1CheckBox = new JCheckBox("home_Directory_1");
-					hd1CheckBox.setBounds(30, 88, 140, 23);
-					popupFrame.getContentPane().add(hd1CheckBox);
-
-					JCheckBox hd2CheckBox = new JCheckBox("home_Directory_2");
-					hd2CheckBox.setBounds(30, 141, 140, 23);
-					popupFrame.getContentPane().add(hd2CheckBox);
-
-					JCheckBox hd3CheckBox = new JCheckBox("home_Directory_3");
-					hd3CheckBox.setBounds(30, 189, 140, 23);
-					popupFrame.getContentPane().add(hd3CheckBox);
-
-					JButton syncBtn = new JButton("DE-SYNC");
-					syncBtn.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							StringBuffer directoryName = new StringBuffer();
-							if (hd1CheckBox.isSelected()) {
-								directoryName.append("home_Directory_1/");
-							}
-							if (hd2CheckBox.isSelected()) {
-								directoryName.append("home_Directory_2/");
-							}
-							if (hd3CheckBox.isSelected()) {
-								directoryName.append("home_Directory_3/");
-							}
-							try {
-								dataOutputStream.writeUTF("DE-SYNC_DIRECTORY " + directoryName);
-							} catch (IOException e1) {
-								e1.printStackTrace();
-							}
-							popupFrame.setVisible(false);
-						}
-					});
-					syncBtn.setBounds(38, 244, 89, 23);
-					popupFrame.getContentPane().add(syncBtn);
-
-					JButton cancelBtn = new JButton("CANCEL");
-					cancelBtn.setBounds(139, 244, 89, 23);
-					cancelBtn.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							popupFrame.setVisible(false);
-						}
-					});
-					popupFrame.getContentPane().add(cancelBtn);
-
-					JLabel syncLabel = new JLabel("DE-SYNC SERVER DIRECTORIES");
-					syncLabel.setFont(new Font("Tahoma", Font.BOLD, 13));
-					syncLabel.setHorizontalAlignment(SwingConstants.CENTER);
-					syncLabel.setBounds(10, 27, 218, 41);
-					popupFrame.getContentPane().add(syncLabel);
-					popupFrame.setVisible(true);
-					updateDirectoryView(Constants.ROOT + clientName);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-
-			}
-		});
-		frame.getContentPane().add(deSyncServerFolderBtn);
 
 		// BROWSE USER DIRECTORY CODE
 		JButton browseBtn = new JButton("BROWSE ");
-		browseBtn.setBounds(77, 515, 130, 36);
+		browseBtn.setBounds(240, 510, 130, 36);
 		browseBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Browse directory instructions sent to server on click of Browse button
@@ -569,7 +506,7 @@ public class ClientWindow {
 
 		// DISCONNECT FROM SERVER CODE
 		JButton disconnectBtn = new JButton("DISCONNECT");
-		disconnectBtn.setBounds(251, 515, 123, 36);
+		disconnectBtn.setBounds(390, 510, 123, 36);
 		disconnectBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Disconnect instructions sent to server on click of disconnect button
@@ -588,7 +525,6 @@ public class ClientWindow {
 		separator_4.setBounds(10, 69, 505, 2);
 		frame.getContentPane().add(separator_4);
 
-		// To display the tree structure of the client directory
 		directoryListViewTextArea = new TextArea();
 		directoryListViewTextArea.setBackground(Color.WHITE);
 		directoryListViewTextArea.setBounds(566, 99, 303, 443);

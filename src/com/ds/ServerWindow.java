@@ -48,8 +48,7 @@ public class ServerWindow {
 	public ServerWindow(String server) {
 		this.server = server;
 		try {
-			// invoke the client window for it to send and receive instructions from/to
-			// server
+			// invoke the server window to modify server directory
 			initialize();
 			frame.setVisible(true);
 		} catch (Exception e1) {
@@ -391,7 +390,7 @@ public class ServerWindow {
 	}
 
 	/**
-	 * Used to dynamically update the Directory view for the client when ever there
+	 * Used to dynamically update the Directory view for the server when ever there
 	 * is a change like create, delete, rename or move.
 	 * 
 	 * @param rootPath
@@ -458,7 +457,8 @@ public class ServerWindow {
 	}
 
 	/**
-	 * Method to create the directory specified by the client
+	 * Method to create the directory specified by the server and also to sync the
+	 * changes across all local directories synchronized by the clients
 	 * 
 	 * @param directory
 	 * @throws IOException
@@ -470,16 +470,21 @@ public class ServerWindow {
 			} else {
 				new File(Constants.ROOT + server + "/" + directory).mkdirs();
 				Server.serverLogsTextArea.append(server + " : Directory Creation Successful \n");
+				// Code to Sync the LD across all clients
+				for (String path : Server.clientDirectories.get(directory.substring(0, directory.indexOf("/")))) {
+					new File(path + directory.substring(directory.indexOf("/"), directory.length())).mkdirs();
+				}
+				Server.serverLogsTextArea.append(server + " : Directory Sync Successful \n");
 			}
 		} catch (Exception e) {
 			Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
 			dataOutputStream.writeUTF(e.getMessage());
 		}
-
 	}
 
 	/**
-	 * Method to delete the directory as specified by the client
+	 * Method to delete the directory as specified by the server and also to sync
+	 * the changes across all local directories synchronized by the clients
 	 * 
 	 * @param directory
 	 * @throws IOException
@@ -490,6 +495,12 @@ public class ServerWindow {
 			if (new File(Constants.ROOT + server + "/" + directory).exists()) {
 				deleteDir(new File(Constants.ROOT + server + "/" + directory));
 				Server.serverLogsTextArea.append(server + " : Deletion Successful \n");
+				// Code to Sync the LD across all clients
+				for (String path : Server.clientDirectories.get(directory.substring(0, directory.indexOf("/")))) {
+					deleteDir(new File(
+							path + "\\" + directory.substring(directory.indexOf("/") + 1, directory.length())));
+				}
+				Server.serverLogsTextArea.append(server + " : Directory Sync Successful \n");
 			} else {
 				Server.serverLogsTextArea.append(server + " : Deletion Failed \n");
 			}
@@ -520,7 +531,8 @@ public class ServerWindow {
 
 	/**
 	 * Method to move the Folder from one directory to another as specified by the
-	 * client
+	 * server and also to sync the changes across all local directories synchronized
+	 * by the clients
 	 * 
 	 * @param oldPath
 	 * @param newPath
@@ -536,6 +548,8 @@ public class ServerWindow {
 			if (oldFolder.exists()) {
 				FileUtils.moveDirectoryToDirectory(oldFolder, newFolder, true);
 				Server.serverLogsTextArea.append(server + " : Move Successful \n");
+				// call the below method to validate the file movement before synchronizing
+				synchronizeDirectoryMove(oldPath, newPath);
 			} else {
 				Server.serverLogsTextArea.append(server + " : Move Failed. Directory does not exist \n");
 			}
@@ -545,7 +559,59 @@ public class ServerWindow {
 	}
 
 	/**
-	 * Method to rename the directory to the name specified by the client
+	 * Method to Synchronize server move operation across all client local
+	 * directories
+	 * 
+	 * This method also checks if the movement of files is between different Home
+	 * directories.
+	 * 
+	 * @param oldPath
+	 * @param newPath
+	 * @throws IOException
+	 */
+	private void synchronizeDirectoryMove(String oldPath, String newPath) throws IOException {
+		String srcRootDirectory = oldPath.substring(0, oldPath.indexOf("/"));
+		String destinationRootDirectory = newPath.substring(0, newPath.indexOf("/"));
+		// check if the files are being moved within the same server directory
+		if (srcRootDirectory.equals(destinationRootDirectory)) {
+			for (String path : Server.clientDirectories.get(srcRootDirectory)) {
+				File oldFolder = new File(
+						path + "\\" + oldPath.substring(oldPath.indexOf("/") + 1, oldPath.length()).replace("/", "\\"));
+				File newFolder = new File(
+						path + "\\" + newPath.substring(newPath.indexOf("/") + 1, newPath.length()).replace("/", "\\"));
+				FileUtils.moveDirectoryToDirectory(oldFolder, newFolder, true);
+			}
+		} else {
+			for (String path : Server.clientDirectories.get(srcRootDirectory)) {
+				File oldFolder = new File(
+						path + "\\" + oldPath.substring(oldPath.indexOf("/") + 1, oldPath.length()).replace("/", "\\"));
+				// Generate a new destination path since the folder is being moved to a
+				// different destination directory
+				String newDestPath = path.substring(0, path.lastIndexOf("\\")) + "\\" + destinationRootDirectory;
+				// Check to see if the new directory to which the file is being moved to
+				// is already synchronized by the client. If the destination directory id
+				// synchronized then go ahead with moving the files.
+				if (new File(newDestPath).exists()) {
+					File newFolder = new File(newDestPath + "\\"
+							+ newPath.substring(newPath.indexOf("/") + 1, newPath.length()).replace("/", "\\"));
+					FileUtils.moveDirectoryToDirectory(oldFolder, newFolder, true);
+				} else {
+					// If the Destination directory is not synchronized by the client then
+					// delete the file being moved from the client's local directory to maintain
+					// the folder structure of the synchronized directories.
+					deleteDir(new File(path + "\\"
+							+ oldPath.substring(oldPath.indexOf("/") + 1, oldPath.length()).replace("/", "\\")));
+				}
+
+			}
+
+		}
+		Server.serverLogsTextArea.append(server + " :  Directory Sync Successful \n");
+	}
+
+	/**
+	 * Method to rename the directory to the name specified by the server and also
+	 * to sync the changes across all local directories synchronized by the clients
 	 * 
 	 * @param oldFolderName
 	 * @param newFolderName
@@ -560,6 +626,16 @@ public class ServerWindow {
 			if (oldFolder.exists()) {
 				oldFolder.renameTo(newFolder);
 				Server.serverLogsTextArea.append(server + " : Rename Successful \n");
+				// Code to Sync the LD across all clients
+				for (String path : Server.clientDirectories
+						.get(oldFolderName.substring(0, oldFolderName.indexOf("/")))) {
+					File oldLDFolder = new File(path + "\\" + oldFolderName
+							.substring(oldFolderName.indexOf("/") + 1, oldFolderName.length()).replace("/", "\\"));
+					File newLDFolder = new File(path + "\\" + newFolderName
+							.substring(newFolderName.indexOf("/") + 1, newFolderName.length()).replace("/", "\\"));
+					oldLDFolder.renameTo(newLDFolder);
+				}
+				Server.serverLogsTextArea.append(server + " : Directory Sync Successful \n");
 			} else {
 				Server.serverLogsTextArea.append(server + " : Rename Failed. Directory does not exist \n");
 			}

@@ -35,7 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
-public class DummyClient {
+public class DummyClient extends JFrame{
 
 	private JFrame frame;
 	private JFrame popupFrame;
@@ -361,16 +361,12 @@ public class DummyClient {
 		separator_3.setBounds(10, 438, 505, 2);
 		frame.getContentPane().add(separator_3);
 
-		// 5. DES-YNC Folder
-		JTextField deSyncTextField = new JTextField();
-		deSyncTextField.setText("Enter the Directory name to be created");
-		deSyncTextField.setForeground(Color.GRAY);
-		deSyncTextField.setColumns(10);
-		deSyncTextField.setBounds(29, 451, 305, 26);
-		frame.getContentPane().add(deSyncTextField);
-
-		JButton deSyncServerFolderBtn = new JButton("DE-SYNC FOLDER");
-		deSyncServerFolderBtn.setBounds(369, 449, 146, 23);
+		JButton deSyncServerFolderBtn = new JButton("DE-SYNC SERVER DIRECTORY");
+		deSyncServerFolderBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		deSyncServerFolderBtn.setBounds(267, 451, 190, 36);
 		frame.getContentPane().add(deSyncServerFolderBtn);
 
 		JSeparator separator_5 = new JSeparator();
@@ -379,7 +375,7 @@ public class DummyClient {
 
 		// 6. SYNC SERVER DIRECTORY CODE
 		JButton syncServerDirectoryBtn = new JButton("SYNC SERVER DIRECTORY ");
-		syncServerDirectoryBtn.setBounds(30, 510, 190, 36);
+		syncServerDirectoryBtn.setBounds(39, 451, 190, 36);
 		syncServerDirectoryBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -440,7 +436,7 @@ public class DummyClient {
 
 		// BROWSE USER DIRECTORY CODE
 		JButton browseBtn = new JButton("BROWSE ");
-		browseBtn.setBounds(240, 510, 130, 36);
+		browseBtn.setBounds(77, 515, 130, 36);
 		browseBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Browse directory instructions sent to server on click of Browse button
@@ -484,7 +480,7 @@ public class DummyClient {
 
 		// DISCONNECT FROM SERVER CODE
 		JButton disconnectBtn = new JButton("DISCONNECT");
-		disconnectBtn.setBounds(390, 510, 123, 36);
+		disconnectBtn.setBounds(251, 515, 123, 36);
 		disconnectBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Disconnect instructions sent to server on click of disconnect button
