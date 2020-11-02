@@ -587,7 +587,7 @@ public class ServerWindow {
 						path + "\\" + oldPath.substring(oldPath.indexOf("/") + 1, oldPath.length()).replace("/", "\\"));
 				// Generate a new destination path since the folder is being moved to a
 				// different destination directory
-				String newDestPath = path.substring(0, path.lastIndexOf("\\")) + "\\" + destinationRootDirectory;
+				String newDestPath = path.substring(0, path.lastIndexOf("\\")) + "\\copy_" + destinationRootDirectory;
 				// Check to see if the new directory to which the file is being moved to
 				// is already synchronized by the client. If the destination directory id
 				// synchronized then go ahead with moving the files.
@@ -605,6 +605,11 @@ public class ServerWindow {
 
 			}
 
+			for (String path : Server.clientDirectories.get(destinationRootDirectory)) {
+				File serverFolder = new File(Constants.ROOT + "SERVER/" + destinationRootDirectory);
+				File clientFolder = new File(path);
+				FileUtils.copyDirectory(serverFolder, clientFolder);
+			}
 		}
 		Server.serverLogsTextArea.append(server + " :  Directory Sync Successful \n");
 	}

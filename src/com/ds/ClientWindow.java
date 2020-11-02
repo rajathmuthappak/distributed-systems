@@ -417,6 +417,7 @@ public class ClientWindow {
 							}
 							try {
 								dataOutputStream.writeUTF("SYNC_DIRECTORY " + directoryName);
+								JOptionPane.showMessageDialog(null, dataInputStream.readUTF());
 							} catch (IOException e1) {
 								e1.printStackTrace();
 							}
@@ -491,6 +492,7 @@ public class ClientWindow {
 							}
 							try {
 								dataOutputStream.writeUTF("DE-SYNC_DIRECTORY " + directoryName);
+								JOptionPane.showMessageDialog(null, dataInputStream.readUTF());
 							} catch (IOException e1) {
 								e1.printStackTrace();
 							}
@@ -672,7 +674,7 @@ public class ClientWindow {
 	private boolean isValidFolderOrPath(String folder) {
 		Pattern pattern = Pattern.compile("^[a-zA-Z0-9_/]*$");
 		Matcher matcher = pattern.matcher(folder);
-		if (!matcher.matches() || folder.length() == 0) {
+		if (!matcher.matches() || folder.length() == 0 || folder.contains("copy_home_Directory")) {
 			return false;
 		}
 		return true;

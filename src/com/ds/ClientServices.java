@@ -5,7 +5,6 @@
 
 package com.ds;
 
-import java.awt.List;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -13,7 +12,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -133,13 +131,33 @@ public class ClientServices extends Thread {
 		for (String desyncDirectory : deSyncDirectories) {
 			String localPath = Constants.ROOT + clientName + "/" + Server.clientIdentifiers.get(clientName) + "/copy_"
 					+ desyncDirectory;
-			deleteDirectory(Server.clientIdentifiers.get(clientName) + "/copy_" + desyncDirectory);
+			deSyncDirectory(Server.clientIdentifiers.get(clientName) + "/copy_" + desyncDirectory);
 			localPath = localPath.replace("/", "\\");
 			Set<String> directories = Server.clientDirectories.get(desyncDirectory);
 			directories.remove(localPath);
 			Server.clientDirectories.put(desyncDirectory, directories);
 		}
+		dataOutputStream.writeUTF("Succesfull..!!");;
 		Server.serverLogsTextArea.append(clientName + " : De-Sync Successful \n");
+	}
+	
+	/**
+	 * Method to delete the directory as specified by the client
+	 * 
+	 * @param directory
+	 * @throws IOException
+	 */
+
+	private void deSyncDirectory(String directory) throws IOException {
+		try {
+			if (new File(Constants.ROOT + clientName + "/" + directory).exists()) {
+				deleteDir(new File(Constants.ROOT + clientName + "/" + directory));
+			} 
+		} catch (Exception e) {
+			Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
+			dataOutputStream.writeUTF(e.getMessage().toString());
+		}
+
 	}
 
 	/**
@@ -213,6 +231,7 @@ public class ClientServices extends Thread {
 			File serverFolder = new File(Constants.ROOT + "SERVER/" + directoryName + "/");
 			File clientFolder = new File(Constants.ROOT + clientName + "/" + Server.clientIdentifiers.get(clientName)
 					+ "/copy_" + directoryName);
+			// Keeping track of list of synchronized directories
 			Set<String> mappedDirectories = Server.clientDirectories.get(directoryName);
 			mappedDirectories.add(clientFolder.getPath().toString());
 			Server.clientDirectories.put(directoryName, mappedDirectories);
@@ -220,10 +239,10 @@ public class ClientServices extends Thread {
 				if (serverFolder.exists()) {
 					FileUtils.copyDirectory(serverFolder, clientFolder, true);
 					Server.serverLogsTextArea.append(clientName + " : " + directoryName + "   Copy Successful \n");
-					dataOutputStream.writeUTF("Move Successful");
+					dataOutputStream.writeUTF("Successful");
 				} else {
-					Server.serverLogsTextArea.append(clientName + " : Move Failed. Directory does not exist \n");
-					dataOutputStream.writeUTF("Move Failed. Directory does not exist");
+					Server.serverLogsTextArea.append(clientName + " : Sync Failed. Directory does not exist \n");
+					dataOutputStream.writeUTF("Sync Failed. Directory does not exist");
 				}
 			} catch (Exception e) {
 				Server.serverLogsTextArea.append("ERROR : " + e.getMessage() + "\n");
@@ -242,8 +261,10 @@ public class ClientServices extends Thread {
 	private void deleteDirectory(String directory) throws IOException {
 		try {
 			if (new File(Constants.ROOT + clientName + "/" + directory).exists()) {
+				// calling delete directory method to recursively delete the directory 
+				// and the sub directories.
 				deleteDir(new File(Constants.ROOT + clientName + "/" + directory));
-				dataOutputStream.writeUTF("Directory DELETED..!");
+				dataOutputStream.writeUTF("Deletion/DeSync Successful..!");
 				Server.serverLogsTextArea.append(clientName + " : Deletion/DeSync Successful \n");
 			} else {
 				dataOutputStream.writeUTF("Folder Does not exist Or Directory was not Synchronized");

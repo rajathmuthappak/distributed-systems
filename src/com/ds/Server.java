@@ -16,8 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +29,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import java.awt.Font;
 
 public class Server {
 
@@ -139,6 +138,7 @@ public class Server {
 		frame.getContentPane().setLayout(null);
 
 		JLabel serverLabel = new JLabel(Constants.SERVER_LABEL);
+		serverLabel.setFont(new Font("Tahoma", Font.BOLD, 17));
 		serverLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		serverLabel.setBounds(10, 11, 414, 39);
 		frame.getContentPane().add(serverLabel);
@@ -148,15 +148,15 @@ public class Server {
 		frame.getContentPane().add(listOfClientsLabel);
 
 		listOfClientsTextField = new TextArea();
-		listOfClientsTextField.setBounds(44, 75, 207, 80);
+		listOfClientsTextField.setBounds(44, 75, 207, 103);
 		listOfClientsTextField.setEditable(false);
 		frame.getContentPane().add(listOfClientsTextField);
 
 		JLabel logsLabel = new JLabel("Server Logs");
-		logsLabel.setBounds(41, 173, 138, 27);
+		logsLabel.setBounds(40, 184, 138, 27);
 		frame.getContentPane().add(logsLabel);
 
-		serverLogsTextArea.setBounds(40, 206, 503, 451);
+		serverLogsTextArea.setBounds(40, 217, 503, 440);
 		frame.getContentPane().add(serverLogsTextArea);
 
 		// Terminate Server
@@ -167,7 +167,7 @@ public class Server {
 			}
 		});
 		serverStopButton.setForeground(Color.RED);
-		serverStopButton.setBounds(434, 11, 109, 39);
+		serverStopButton.setBounds(410, 11, 133, 39);
 		frame.getContentPane().add(serverStopButton);
 
 		JButton directoryBtn = new JButton("EDIT DIRECTORY");
@@ -184,7 +184,7 @@ public class Server {
 				});
 			}
 		});
-		directoryBtn.setBounds(434, 61, 109, 39);
+		directoryBtn.setBounds(410, 61, 133, 39);
 		frame.getContentPane().add(directoryBtn);
 	}
 
