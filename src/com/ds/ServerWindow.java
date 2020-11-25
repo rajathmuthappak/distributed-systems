@@ -335,7 +335,7 @@ public class ServerWindow {
 						JOptionPane.showMessageDialog(null, "Invalid Folder Name or Directory structure");
 					} else {
 						Server.serverLogsTextArea
-								.append("SERVER : MOVE_DIRECTORY " + moveDirFromTextField.getText().toString().trim()
+								.append("SERVER : MOVE_DIRECTORY ->" + moveDirFromTextField.getText().toString().trim()
 										+ ":" + moveDirToTextField.getText().toString().trim() + "\n");
 						moveDirectory(moveDirFromTextField.getText().toString().trim(),
 								moveDirToTextField.getText().toString().trim());
@@ -585,8 +585,6 @@ public class ServerWindow {
 	 */
 	// https://www.studytrails.com/java-io/file-copying-and-moving-deleting/
 	private void moveDirectory(String oldPath, String newPath) throws IOException {
-		Server.serverLogsTextArea.append(server + " : MOVE_DIRECTORY " + Constants.ROOT + server + "/" + oldPath
-				+ " -> " + Constants.ROOT + server + "/" + newPath + "/ \n");
 		File oldFolder = new File(Constants.ROOT + server + "/" + oldPath);
 		File newFolder = new File(Constants.ROOT + server + "/" + newPath);
 		try {
@@ -714,13 +712,19 @@ public class ServerWindow {
 				path = text.substring(text.indexOf(">") + 1, text.length()).trim();
 				// calling delete method to UNDO create.
 				deleteDirectory(path);
-			}
-			if (text.contains(Constants.RENAME_DIRECTORY)) {
-
+			} else if (text.contains(Constants.RENAME_DIRECTORY)) {
 				String oldFolderName = text.substring(text.indexOf(":") + 1).trim();
 				String newFolderName = text.substring(text.indexOf(" ") + 1, text.indexOf(":")).trim();
 				renameDirectory(oldFolderName, newFolderName);
 				path = text.substring(text.indexOf(" ") + 1, text.length()).trim();
+			} else if (text.contains(Constants.MOVE_DIRECTORY)) {
+				// MOVE_DIRECTORY ->home_Directory_1/new45:home_Directory_2/
+				String firstName = text.substring(text.indexOf(">") + 1, text.indexOf(":")).trim();
+				String secondName = text.substring(text.indexOf(":") + 1).trim();
+				String oldFolderName = secondName.concat(firstName.substring(firstName.lastIndexOf("/") + 1));
+				String newFolderName = firstName.substring(0, firstName.lastIndexOf("/") + 1);
+				moveDirectory(oldFolderName, newFolderName);
+				path = text.substring(text.indexOf(">") + 1, text.length()).trim();
 			}
 			// call clearLog to remove the logged contents from the server log file.
 			clearLog(currentLog, text, path);
@@ -749,6 +753,10 @@ public class ServerWindow {
 					&& str.contains(path))
 					|| (text.contains(Constants.RENAME_DIRECTORY)
 							&& (str.contains(Constants.RENAME_DIRECTORY) || str.contains("Rename Successful -> From"))
+							&& str.contains(path.substring(0, path.indexOf(":")))
+							&& str.contains(path.substring(path.indexOf(":") + 1)))
+					|| (text.contains(Constants.MOVE_DIRECTORY)
+							&& (str.contains(Constants.MOVE_DIRECTORY) || str.contains("Move Successful -> from"))
 							&& str.contains(path.substring(0, path.indexOf(":")))
 							&& str.contains(path.substring(path.indexOf(":") + 1))))) {
 				newLog.append(str + "\n");
