@@ -30,6 +30,8 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import java.awt.Font;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 public class Server {
 
@@ -133,7 +135,7 @@ public class Server {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 585, 706);
+		frame.setBounds(100, 100, 587, 711);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
@@ -156,7 +158,7 @@ public class Server {
 		logsLabel.setBounds(40, 184, 138, 27);
 		frame.getContentPane().add(logsLabel);
 
-		serverLogsTextArea.setBounds(40, 217, 503, 440);
+		serverLogsTextArea.setBounds(40, 217, 468, 440);
 		frame.getContentPane().add(serverLogsTextArea);
 
 		// Terminate Server

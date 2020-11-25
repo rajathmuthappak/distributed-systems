@@ -41,6 +41,7 @@ public class ServerWindow {
 	private JLabel clientLabel;
 	private String server;
 	private DataOutputStream dataOutputStream;
+	private JTextField undoCreateTextField;
 
 	/**
 	 * Create the application.
@@ -61,7 +62,7 @@ public class ServerWindow {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 895, 562);
+		frame.setBounds(100, 100, 893, 578);
 		// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
@@ -125,13 +126,13 @@ public class ServerWindow {
 		frame.getContentPane().add(createDirBtn);
 
 		JSeparator separator = new JSeparator();
-		separator.setBounds(10, 147, 505, 2);
+		separator.setBounds(20, 129, 505, 2);
 		frame.getContentPane().add(separator);
 
 		// 2. DELETE DIRECTORY CODE
 		deleteDirTextField = new JTextField();
 		deleteDirTextField.setColumns(10);
-		deleteDirTextField.setBounds(29, 172, 305, 26);
+		deleteDirTextField.setBounds(29, 142, 305, 26);
 		deleteDirTextField.setText("Enter the Directory name/path to be deleted");
 		deleteDirTextField.setForeground(Color.GRAY);
 		// https://stackoverflow.com/questions/16213836/java-swing-jtextfield-set-placeholder
@@ -157,7 +158,7 @@ public class ServerWindow {
 		frame.getContentPane().add(deleteDirTextField);
 
 		JButton deleteDirBtn = new JButton("DELETE DIRECTORY");
-		deleteDirBtn.setBounds(369, 174, 146, 23);
+		deleteDirBtn.setBounds(369, 144, 146, 23);
 		deleteDirBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Delete directory instructions sent to server on click of delete button
@@ -180,13 +181,13 @@ public class ServerWindow {
 		frame.getContentPane().add(deleteDirBtn);
 
 		JSeparator separator_1 = new JSeparator();
-		separator_1.setBounds(10, 227, 505, 2);
+		separator_1.setBounds(20, 179, 505, 2);
 		frame.getContentPane().add(separator_1);
 
 		// 3. RENAME DIRECRTORY CODE
 		renameDirFromTextField = new JTextField();
 		renameDirFromTextField.setColumns(10);
-		renameDirFromTextField.setBounds(29, 240, 305, 26);
+		renameDirFromTextField.setBounds(29, 192, 305, 26);
 		renameDirFromTextField.setText("Enter the Directory name to rename");
 		renameDirFromTextField.setForeground(Color.GRAY);
 		// https://stackoverflow.com/questions/16213836/java-swing-jtextfield-set-placeholder
@@ -213,7 +214,7 @@ public class ServerWindow {
 
 		renameDirToTextField = new JTextField();
 		renameDirToTextField.setColumns(10);
-		renameDirToTextField.setBounds(29, 295, 305, 26);
+		renameDirToTextField.setBounds(29, 229, 305, 26);
 		renameDirToTextField.setText("Enter the new Directory name.");
 		renameDirToTextField.setForeground(Color.GRAY);
 		// https://stackoverflow.com/questions/16213836/java-swing-jtextfield-set-placeholder
@@ -239,7 +240,7 @@ public class ServerWindow {
 		frame.getContentPane().add(renameDirToTextField);
 
 		JButton renameDirBtn = new JButton("RENAME DIRECTORY");
-		renameDirBtn.setBounds(369, 279, 146, 23);
+		renameDirBtn.setBounds(369, 211, 146, 23);
 		renameDirBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Rename directory instructions sent to server on click of Rename button
@@ -265,13 +266,13 @@ public class ServerWindow {
 		frame.getContentPane().add(renameDirBtn);
 
 		JSeparator separator_2 = new JSeparator();
-		separator_2.setBounds(10, 332, 505, 2);
+		separator_2.setBounds(20, 266, 505, 2);
 		frame.getContentPane().add(separator_2);
 
 		// 4 . MOVE DIRECTORY CODE
 		moveDirFromTextField = new JTextField();
 		moveDirFromTextField.setColumns(10);
-		moveDirFromTextField.setBounds(29, 346, 305, 26);
+		moveDirFromTextField.setBounds(29, 279, 305, 26);
 		moveDirFromTextField.setText("Enter the Directory name / path to be moved.");
 		moveDirFromTextField.setForeground(Color.GRAY);
 		// https://stackoverflow.com/questions/16213836/java-swing-jtextfield-set-placeholder
@@ -298,7 +299,7 @@ public class ServerWindow {
 
 		moveDirToTextField = new JTextField();
 		moveDirToTextField.setColumns(10);
-		moveDirToTextField.setBounds(29, 401, 305, 26);
+		moveDirToTextField.setBounds(29, 316, 305, 26);
 		moveDirToTextField.setText("Enter the new Directory path.");
 		moveDirToTextField.setForeground(Color.GRAY);
 		// https://stackoverflow.com/questions/16213836/java-swing-jtextfield-set-placeholder
@@ -324,7 +325,7 @@ public class ServerWindow {
 		frame.getContentPane().add(moveDirToTextField);
 
 		JButton moveDirBtn = new JButton("MOVE DIRECTORY");
-		moveDirBtn.setBounds(369, 385, 146, 23);
+		moveDirBtn.setBounds(369, 299, 146, 23);
 		moveDirBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Move directory instructions sent to server on click of Move button
@@ -350,12 +351,12 @@ public class ServerWindow {
 		frame.getContentPane().add(moveDirBtn);
 
 		JSeparator separator_3 = new JSeparator();
-		separator_3.setBounds(10, 438, 505, 2);
+		separator_3.setBounds(20, 353, 505, 2);
 		frame.getContentPane().add(separator_3);
 
 		// DISCONNECT FROM SERVER CODE
 		JButton closeBtn = new JButton("CLOSE");
-		closeBtn.setBounds(306, 468, 123, 36);
+		closeBtn.setBounds(288, 478, 146, 26);
 		closeBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				frame.dispose();
@@ -364,7 +365,7 @@ public class ServerWindow {
 		frame.getContentPane().add(closeBtn);
 
 		JSeparator separator_4 = new JSeparator();
-		separator_4.setBounds(10, 69, 505, 2);
+		separator_4.setBounds(20, 79, 505, 2);
 		frame.getContentPane().add(separator_4);
 
 		directoryListViewTextArea = new TextArea();
@@ -386,6 +387,48 @@ public class ServerWindow {
 		});
 		refreshButton.setBounds(751, 69, 89, 23);
 		frame.getContentPane().add(refreshButton);
+
+		undoCreateTextField = new JTextField();
+		undoCreateTextField.setForeground(Color.GRAY);
+		undoCreateTextField.setColumns(10);
+		undoCreateTextField.setText("Enter Logged operation to Undo");
+		undoCreateTextField.setBounds(29, 366, 305, 26);
+		undoCreateTextField.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				if (undoCreateTextField.getText().isEmpty()) {
+					undoCreateTextField.setText("Enter Logged operation to Undo");
+					undoCreateTextField.setForeground(Color.GRAY);
+				}
+			}
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				if (undoCreateTextField.getText().equals("Enter Logged operation to Undo")) {
+					undoCreateTextField.setText("");
+					undoCreateTextField.setForeground(Color.BLACK);
+
+				}
+			}
+		});
+		frame.getContentPane().add(undoCreateTextField);
+
+		JButton undoCreateBtn = new JButton("UNDO");
+		undoCreateBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				undoOPeration(undoCreateTextField.getText());
+			}
+		});
+		undoCreateBtn.setBounds(369, 368, 146, 23);
+		frame.getContentPane().add(undoCreateBtn);
+
+		JSeparator separator_5 = new JSeparator();
+		separator_5.setBounds(20, 403, 505, 2);
+		frame.getContentPane().add(separator_5);
+
+		JSeparator separator_7 = new JSeparator();
+		separator_7.setBounds(10, 638, 505, 2);
+		frame.getContentPane().add(separator_7);
 		updateDirectoryView(Constants.ROOT + server);
 	}
 
@@ -465,11 +508,12 @@ public class ServerWindow {
 	 */
 	private void createDirectory(String directory) throws IOException {
 		try {
-			if (new File(Constants.ROOT + server + "/" + directory).exists()) {
+			String pathName = Constants.ROOT + server + "/" + directory;
+			if (new File(pathName).exists()) {
 				Server.serverLogsTextArea.append(server + " : Directory Creation Failed \n");
 			} else {
 				new File(Constants.ROOT + server + "/" + directory).mkdirs();
-				Server.serverLogsTextArea.append(server + " : Directory Creation Successful \n");
+				Server.serverLogsTextArea.append(server + " : Directory Creation Successful -> " + pathName + "\n");
 				// Code to Sync the LD across all clients
 				for (String path : Server.clientDirectories.get(directory.substring(0, directory.indexOf("/")))) {
 					new File(path + directory.substring(directory.indexOf("/"), directory.length())).mkdirs();
@@ -492,9 +536,10 @@ public class ServerWindow {
 
 	private void deleteDirectory(String directory) throws IOException {
 		try {
-			if (new File(Constants.ROOT + server + "/" + directory).exists()) {
+			String pathName = Constants.ROOT + server + "/" + directory;
+			if (new File(pathName).exists()) {
 				deleteDir(new File(Constants.ROOT + server + "/" + directory));
-				Server.serverLogsTextArea.append(server + " : Deletion Successful \n");
+				Server.serverLogsTextArea.append(server + " : Deletion Successful -> " + pathName + "\n");
 				// Code to Sync the LD across all clients
 				for (String path : Server.clientDirectories.get(directory.substring(0, directory.indexOf("/")))) {
 					deleteDir(new File(
@@ -547,7 +592,8 @@ public class ServerWindow {
 		try {
 			if (oldFolder.exists()) {
 				FileUtils.moveDirectoryToDirectory(oldFolder, newFolder, true);
-				Server.serverLogsTextArea.append(server + " : Move Successful \n");
+				Server.serverLogsTextArea
+						.append(server + " : Move Successful -> from : " + oldPath + " to " + newPath + "\n");
 				// call the below method to validate the file movement before synchronizing
 				synchronizeDirectoryMove(oldPath, newPath);
 			} else {
@@ -630,7 +676,8 @@ public class ServerWindow {
 		try {
 			if (oldFolder.exists()) {
 				oldFolder.renameTo(newFolder);
-				Server.serverLogsTextArea.append(server + " : Rename Successful \n");
+				Server.serverLogsTextArea.append(
+						server + " : Rename Successful -> From " + oldFolderName + " to " + newFolderName + "\n");
 				// Code to Sync the LD across all clients
 				for (String path : Server.clientDirectories
 						.get(oldFolderName.substring(0, oldFolderName.indexOf("/")))) {
@@ -651,4 +698,62 @@ public class ServerWindow {
 
 	}
 
+	/**
+	 * This method is used for Undo operations Operations that could be performed
+	 * are UNDO CREATE, UNDO RENAME and UNDO move. UNDO delete cannot be performed.
+	 * This method accepts the log statement that the user wishes to undo.
+	 * 
+	 * @param text
+	 */
+	private void undoOPeration(String text) {
+		// keep track of the existing log contents.
+		String currentLog = Server.serverLogsTextArea.getText();
+		String path = "";
+		try {
+			if (text.contains(Constants.CREATE_DIRECTORY)) {
+				path = text.substring(text.indexOf(">") + 1, text.length()).trim();
+				// calling delete method to UNDO create.
+				deleteDirectory(path);
+			}
+			if (text.contains(Constants.RENAME_DIRECTORY)) {
+
+				String oldFolderName = text.substring(text.indexOf(":") + 1).trim();
+				String newFolderName = text.substring(text.indexOf(" ") + 1, text.indexOf(":")).trim();
+				renameDirectory(oldFolderName, newFolderName);
+				path = text.substring(text.indexOf(" ") + 1, text.length()).trim();
+			}
+			// call clearLog to remove the logged contents from the server log file.
+			clearLog(currentLog, text, path);
+			updateDirectoryView(Constants.ROOT + server);
+		} catch (IOException e) {
+			Server.serverLogsTextArea.append("Error: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * This method is used to clear the operations that were selected to UNDO. All
+	 * the operation performed would be deleted from the server logs. Matches the
+	 * log file with the UNDO operation mentioned by the user.
+	 * 
+	 * @param currentLog
+	 * @param text
+	 * @param path
+	 */
+	private void clearLog(String currentLog, String text, String path) {
+		// TODO Auto-generated method stub
+		String[] logArray = currentLog.split("\n");
+		StringBuffer newLog = new StringBuffer();
+		for (String str : logArray) {
+			if (!((text.contains(Constants.CREATE_DIRECTORY)
+					&& (str.contains(Constants.CREATE_DIRECTORY) || str.contains("Directory Creation Successful"))
+					&& str.contains(path))
+					|| (text.contains(Constants.RENAME_DIRECTORY)
+							&& (str.contains(Constants.RENAME_DIRECTORY) || str.contains("Rename Successful -> From"))
+							&& str.contains(path.substring(0, path.indexOf(":")))
+							&& str.contains(path.substring(path.indexOf(":") + 1))))) {
+				newLog.append(str + "\n");
+			}
+		}
+		Server.serverLogsTextArea.setText(newLog.toString());
+	}
 }
