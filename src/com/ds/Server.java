@@ -135,14 +135,14 @@ public class Server {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 587, 711);
+		frame.setBounds(100, 100, 867, 718);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
 		JLabel serverLabel = new JLabel(Constants.SERVER_LABEL);
 		serverLabel.setFont(new Font("Tahoma", Font.BOLD, 17));
 		serverLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		serverLabel.setBounds(10, 11, 414, 39);
+		serverLabel.setBounds(162, 11, 414, 39);
 		frame.getContentPane().add(serverLabel);
 
 		JLabel listOfClientsLabel = new JLabel(Constants.LIST_OF_CLIENTS_LABEL);
@@ -150,7 +150,7 @@ public class Server {
 		frame.getContentPane().add(listOfClientsLabel);
 
 		listOfClientsTextField = new TextArea();
-		listOfClientsTextField.setBounds(44, 75, 207, 103);
+		listOfClientsTextField.setBounds(44, 75, 440, 103);
 		listOfClientsTextField.setEditable(false);
 		frame.getContentPane().add(listOfClientsTextField);
 
@@ -158,7 +158,7 @@ public class Server {
 		logsLabel.setBounds(40, 184, 138, 27);
 		frame.getContentPane().add(logsLabel);
 
-		serverLogsTextArea.setBounds(40, 217, 468, 440);
+		serverLogsTextArea.setBounds(40, 217, 728, 440);
 		frame.getContentPane().add(serverLogsTextArea);
 
 		// Terminate Server
@@ -169,7 +169,7 @@ public class Server {
 			}
 		});
 		serverStopButton.setForeground(Color.RED);
-		serverStopButton.setBounds(410, 11, 133, 39);
+		serverStopButton.setBounds(601, 13, 133, 39);
 		frame.getContentPane().add(serverStopButton);
 
 		JButton directoryBtn = new JButton("EDIT DIRECTORY");
@@ -186,7 +186,7 @@ public class Server {
 				});
 			}
 		});
-		directoryBtn.setBounds(410, 61, 133, 39);
+		directoryBtn.setBounds(601, 75, 133, 39);
 		frame.getContentPane().add(directoryBtn);
 	}
 

@@ -110,8 +110,8 @@ public class ServerWindow {
 							|| createDirTextField.getText().toString().trim().length() == 0) {
 						JOptionPane.showMessageDialog(null, "Invalid Folder Name or Directory structure");
 					} else {
-						Server.serverLogsTextArea.append(
-								"SERVER : CREATE_DIRECTORY ->" + createDirTextField.getText().toString().trim() + "\n");
+						Server.serverLogsTextArea.append("SERVER (CMD): CREATE_DIRECTORY ->"
+								+ createDirTextField.getText().toString().trim() + "\n");
 						createDirectory(createDirTextField.getText().toString().trim());
 						createDirTextField.setText("");
 					}
@@ -167,8 +167,8 @@ public class ServerWindow {
 							|| deleteDirTextField.getText().toString().trim().length() == 0) {
 						JOptionPane.showMessageDialog(null, "Invalid Folder Name or Directory structure");
 					} else {
-						Server.serverLogsTextArea.append(
-								"SERVER : DELETE_DIRECTORY ->" + deleteDirTextField.getText().toString().trim() + "\n");
+						Server.serverLogsTextArea.append("SERVER (CMD): DELETE_DIRECTORY ->"
+								+ deleteDirTextField.getText().toString().trim() + "\n");
 						deleteDirectory(deleteDirTextField.getText().toString().trim());
 						deleteDirTextField.setText("");
 					}
@@ -250,8 +250,8 @@ public class ServerWindow {
 						JOptionPane.showMessageDialog(null, "Invalid Folder Name or Directory structure");
 					} else {
 						Server.serverLogsTextArea.append(
-								"SERVER : RENAME_DIRECTORY " + renameDirFromTextField.getText().toString().trim() + ":"
-										+ renameDirToTextField.getText().toString().trim() + "\n");
+								"SERVER (CMD): RENAME_DIRECTORY " + renameDirFromTextField.getText().toString().trim()
+										+ ":" + renameDirToTextField.getText().toString().trim() + "\n");
 						renameDirectory(renameDirFromTextField.getText().toString().trim(),
 								renameDirToTextField.getText().toString().trim());
 					}
@@ -334,8 +334,8 @@ public class ServerWindow {
 							&& !isValidFolderOrPath(moveDirToTextField.getText().toString().trim())) {
 						JOptionPane.showMessageDialog(null, "Invalid Folder Name or Directory structure");
 					} else {
-						Server.serverLogsTextArea
-								.append("SERVER : MOVE_DIRECTORY ->" + moveDirFromTextField.getText().toString().trim()
+						Server.serverLogsTextArea.append(
+								"SERVER (CMD): MOVE_DIRECTORY ->" + moveDirFromTextField.getText().toString().trim()
 										+ ":" + moveDirToTextField.getText().toString().trim() + "\n");
 						moveDirectory(moveDirFromTextField.getText().toString().trim(),
 								moveDirToTextField.getText().toString().trim());
@@ -370,13 +370,13 @@ public class ServerWindow {
 
 		directoryListViewTextArea = new TextArea();
 		directoryListViewTextArea.setBackground(Color.WHITE);
-		directoryListViewTextArea.setBounds(566, 99, 303, 405);
+		directoryListViewTextArea.setBounds(566, 52, 303, 469);
 		directoryListViewTextArea.setEditable(false);
 		frame.getContentPane().add(directoryListViewTextArea);
 
 		JLabel directoryListViewLabel = new JLabel("Directory View");
 		directoryListViewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		directoryListViewLabel.setBounds(587, 68, 103, 14);
+		directoryListViewLabel.setBounds(584, 27, 103, 14);
 		frame.getContentPane().add(directoryListViewLabel);
 
 		JButton refreshButton = new JButton("Refresh");
@@ -385,7 +385,7 @@ public class ServerWindow {
 				updateDirectoryView(Constants.ROOT + server);
 			}
 		});
-		refreshButton.setBounds(751, 69, 89, 23);
+		refreshButton.setBounds(751, 23, 89, 23);
 		frame.getContentPane().add(refreshButton);
 
 		undoCreateTextField = new JTextField();
@@ -709,16 +709,19 @@ public class ServerWindow {
 		String path = "";
 		try {
 			if (text.contains(Constants.CREATE_DIRECTORY)) {
+				// Get the directory path from where the folder has to be deleted.
 				path = text.substring(text.indexOf(">") + 1, text.length()).trim();
 				// calling delete method to UNDO create.
 				deleteDirectory(path);
 			} else if (text.contains(Constants.RENAME_DIRECTORY)) {
+				// Get the old and new folder names that has to be used to perform the UNDO
 				String oldFolderName = text.substring(text.indexOf(":") + 1).trim();
 				String newFolderName = text.substring(text.indexOf(" ") + 1, text.indexOf(":")).trim();
 				renameDirectory(oldFolderName, newFolderName);
 				path = text.substring(text.indexOf(" ") + 1, text.length()).trim();
 			} else if (text.contains(Constants.MOVE_DIRECTORY)) {
-				// MOVE_DIRECTORY ->home_Directory_1/new45:home_Directory_2/
+				// get the old path and the new path that could be used to perform the UNDO
+				// operation.
 				String firstName = text.substring(text.indexOf(">") + 1, text.indexOf(":")).trim();
 				String secondName = text.substring(text.indexOf(":") + 1).trim();
 				String oldFolderName = secondName.concat(firstName.substring(firstName.lastIndexOf("/") + 1));
@@ -748,6 +751,7 @@ public class ServerWindow {
 		String[] logArray = currentLog.split("\n");
 		StringBuffer newLog = new StringBuffer();
 		for (String str : logArray) {
+			// Conditions for the statements that should be removed from the server logs
 			if (!((text.contains(Constants.CREATE_DIRECTORY)
 					&& (str.contains(Constants.CREATE_DIRECTORY) || str.contains("Directory Creation Successful"))
 					&& str.contains(path))
